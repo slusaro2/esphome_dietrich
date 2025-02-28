@@ -1,0 +1,284 @@
+esphome:
+  name: "kotlownia-piec"
+
+esp8266:
+  board: d1_mini
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  manual_ip:
+    static_ip: 192.168.20.12
+    gateway: 192.168.20.1
+    subnet: 255.255.255.0
+  ap:
+    ssid: "Kotlownia Piec2 Fallback Hotspot"
+    password: "InO2d760FPGNnnn"
+
+captive_portal:
+
+logger:
+
+api:
+
+ota:
+  - platform: esphome
+
+uart:
+  id: uart_bus
+  baud_rate: 9600
+  tx_pin: GPIO1
+  rx_pin: GPIO3
+
+text_sensor:
+  - platform: template
+    id: piec_status_txt
+    name: "Piec Status"
+  - platform: template
+    id: piec_podstatus_txt
+    name: "Piec Podstatus"
+
+#JEŚLI KOMPONENT JEST LOKALNY
+#external_components:
+#  - source:
+#      type: local
+#      path: my_components   # folder zawierający podfolder "dietrich" z powyższymi plikami
+
+#JEŚLI KOMPONENT JEST GITHUBA
+external_components:
+  - source:
+      type: github
+      repository: slusaro2/esphome_dietrich
+      revision: main
+
+sensor:
+  - platform: dietrich
+    id: dietrich_component
+    state:
+      id: piec_status
+      internal: true
+      on_value:
+        then:
+          - lambda: |-
+              if (id(piec_status).state == 0) {
+                id(piec_status_txt).publish_state("0: Czuwanie");  // Tryb czuwania
+              } else if (id(piec_status).state == 1) {
+                id(piec_status_txt).publish_state("1: Uruchomienie kot\u0142a");  // Start kotła
+              } else if (id(piec_status).state == 2) {
+                id(piec_status_txt).publish_state("2: Uruchomienie palnika");  // Start palnika
+              } else if (id(piec_status).state == 3) {
+                id(piec_status_txt).publish_state("3: Ogrzewanie CO");  // Ogrzewanie CO
+              } else if (id(piec_status).state == 4) {
+                id(piec_status_txt).publish_state("4: Ogrzewanie CWU");  // Ogrzewanie c.w.u.
+              } else if (id(piec_status).state == 5) {
+                id(piec_status_txt).publish_state("5: Zatrzymanie palnika");  // Palnik wyłączony
+              } else if (id(piec_status).state == 6) {
+                id(piec_status_txt).publish_state("6: Zatrzymanie kot\u0142a");  // Kocioł wyłączony
+              } else if (id(piec_status).state == 7) {
+                id(piec_status_txt).publish_state("7: -");
+              } else if (id(piec_status).state == 8) {
+                id(piec_status_txt).publish_state("8: Kontrolowane zatrzymanie");
+              } else if (id(piec_status).state == 9) {
+                id(piec_status_txt).publish_state("9: Tryb blokowania");
+              } else if (id(piec_status).state == 10) {
+                id(piec_status_txt).publish_state("10: Tryb blokowania");
+              } else if (id(piec_status).state == 11) {
+                id(piec_status_txt).publish_state("11: Tryb kominiarski L");  // Tryb kominiarski (niski)
+              } else if (id(piec_status).state == 12) {
+                id(piec_status_txt).publish_state("12: Tryb kominiarski H");  // Tryb kominiarski (wysoki)
+              } else if (id(piec_status).state == 13) {
+                id(piec_status_txt).publish_state("13: Tryb kominiarski H");
+              } else if (id(piec_status).state == 14) {
+                id(piec_status_txt).publish_state("14: -");
+              } else if (id(piec_status).state == 15) {
+                id(piec_status_txt).publish_state("15: R\u0119czne \u017c\u0105danie ciep\u0142a");
+              } else if (id(piec_status).state == 16) {
+                id(piec_status_txt).publish_state("16: Zabezpieczenie przed zamarzaniem");
+              } else if (id(piec_status).state == 17) {
+                id(piec_status_txt).publish_state("17: Odpowietrzanie");
+              } else {
+                id(piec_status_txt).publish_state("999: Nieznany");
+              }
+    sub_state:
+      id: piec_podstatus
+      internal: true
+      on_value:
+        then:
+          - lambda: |-
+              if (id(piec_podstatus).state == 0) {
+                id(piec_podstatus_txt).publish_state("0: Czuwanie");
+              } else if (id(piec_podstatus).state == 1) {
+                id(piec_podstatus_txt).publish_state("1: Anti-cycling");
+              } else if (id(piec_podstatus).state == 2) {
+                id(piec_podstatus_txt).publish_state("2: Otwarcie zaworu hydr.");
+              } else if (id(piec_podstatus).state == 3) {
+                id(piec_podstatus_txt).publish_state("3: Start pompy");
+              } else if (id(piec_podstatus).state == 4) {
+                id(piec_podstatus_txt).publish_state("4: Oczekiwanie na start palnika");
+              } else if (id(piec_podstatus).state == 5) {
+                id(piec_podstatus_txt).publish_state("5: -");
+              } else if (id(piec_podstatus).state == 6) {
+                id(piec_podstatus_txt).publish_state("6: -");
+              } else if (id(piec_podstatus).state == 7) {
+                id(piec_podstatus_txt).publish_state("7: -");
+              } else if (id(piec_podstatus).state == 8) {
+                id(piec_podstatus_txt).publish_state("8: -");
+              } else if (id(piec_podstatus).state == 9) {
+                id(piec_podstatus_txt).publish_state("9: -");
+              } else if (id(piec_podstatus).state == 10) {
+                id(piec_podstatus_txt).publish_state("10: Otwarcie zewn\u0119trznego zaworu gazu");
+              } else if (id(piec_podstatus).state == 11) {
+                id(piec_podstatus_txt).publish_state("11: Wentylator do pr\u0119dko\u015bci zaworu spalin");
+              } else if (id(piec_podstatus).state == 12) {
+                id(piec_podstatus_txt).publish_state("12: Otwarcie zaworu spalin");
+              } else if (id(piec_podstatus).state == 13) {
+                id(piec_podstatus_txt).publish_state("13: Wst\u0119pne przewietrzanie");
+              } else if (id(piec_podstatus).state == 14) {
+                id(piec_podstatus_txt).publish_state("14: Oczekiwanie na odblokowanie");
+              } else if (id(piec_podstatus).state == 15) {
+                id(piec_podstatus_txt).publish_state("15: Start palnika");
+              } else if (id(piec_podstatus).state == 16) {
+                id(piec_podstatus_txt).publish_state("16: Test VPS");
+              } else if (id(piec_podstatus).state == 17) {
+                id(piec_podstatus_txt).publish_state("17: Zap\u0142on wst\u0119pny");
+              } else if (id(piec_podstatus).state == 18) {
+                id(piec_podstatus_txt).publish_state("18: Zap\u0142on");
+              } else if (id(piec_podstatus).state == 19) {
+                id(piec_podstatus_txt).publish_state("19: Kontrola p\u0142omienia");
+              } else if (id(piec_podstatus).state == 30) {
+                id(piec_podstatus_txt).publish_state("30: Normalny wewn\u0119trzny setpoint");
+              } else if (id(piec_podstatus).state == 31) {
+                id(piec_podstatus_txt).publish_state("31: Ograniczony wewn\u0119trzny setpoint");
+              } else if (id(piec_podstatus).state == 32) {
+                id(piec_podstatus_txt).publish_state("32: Normalna kontrola mocy");
+              } else {
+                id(piec_podstatus_txt).publish_state("999: Nieznany");
+              }
+
+    lockout:
+      name: "Piec lockout"
+    blocking:
+      name: "Piec blocking"
+    flow_temp:
+      name: "Piec temp. przep\u0142ywu"
+      unit_of_measurement: "°C"
+    return_temp:
+      name: "Piec temp. powrotu"
+      unit_of_measurement: "°C"
+    outside_temp:
+      name: "Piec temp. zewn\u0119trzna"
+      unit_of_measurement: "°C"
+    calorifier_temp:
+      name: "Piec temp. podgrzewacza"
+      unit_of_measurement: "°C"
+    boiler_control_temp:
+      name: "Piec temp. pieca"
+      unit_of_measurement: "°C"
+    room_temp:
+      name: "Piec temp. pomieszczenia"
+      unit_of_measurement: "°C"
+    ch_setpoint:
+      name: "Piec zadana temp. CO"
+      unit_of_measurement: "°C"
+    dhw_setpoint:
+      name: "Piec zadana temp. CWU"
+      unit_of_measurement: "°C"
+    room_temp_setpoint:
+      name: "Piec zadana temp. pomieszczenia"
+      unit_of_measurement: "°C"
+    fan_speed_setpoint:
+      name: "Piec zadana pr\u0119dko\u015b\u0107 wentylatora"
+      unit_of_measurement: "rpm"
+    fan_speed:
+      name: "Piec pr\u0119dko\u015b\u0107 wentylatora"
+      unit_of_measurement: "rpm"
+    ionisation_current:
+      name: "Piec pr\u0105d jonizacji"
+      unit_of_measurement: "µA"
+    internal_setpoint:
+      name: "Piec wewn\u0119trzna warto\u015b\u0107 zadana"
+      unit_of_measurement: "%"
+    available_power:
+      name: "Piec available_power"
+      unit_of_measurement: "%"
+    pump_percentage:
+      name: "Piec pump_percentage"
+      unit_of_measurement: "%"
+    desired_max_power:
+      name: "Piec desired_max_power"
+      unit_of_measurement: "%"
+    actual_power:
+      name: "Piec actual_power"
+      unit_of_measurement: "%"
+    demand_source_bit0:
+      name: "Piec Mod.Controller Connected"
+    demand_source_bit1:
+      name: "Piec Heat demand from Mod.Controller"
+    demand_source_bit2:
+      name: "Piec Heat demand from on/off controller"
+    demand_source_bit3:
+      name: "Piec Frost Protection"
+    demand_source_bit4:
+      name: "Piec DHW Eco"
+    demand_source_bit5:
+      name: "Piec DHW Blocking"
+    demand_source_bit6:
+      name: "Piec Anti Legionella"
+    demand_source_bit7:
+      name: "Piec DHW Heat Demand"
+    hours_run_pump:
+      name: "Piec ilo\u015b\u0107 godzin pracy pompy"
+      unit_of_measurement: "h"
+      accuracy_decimals: 0
+    hours_run_3way:
+      name: "Piec ilo\u015b\u0107 godzin pracy zaworu tr\u00f3jdro\u017cnego"
+      unit_of_measurement: "h"
+      accuracy_decimals: 0
+    hours_run_ch:
+      name: "Piec ilo\u015b\u0107 godzin pracy"
+      unit_of_measurement: "h"
+      accuracy_decimals: 0
+    hours_run_dhw:
+      name: "Piec ilo\u015b\u0107 godzin pracy c.w.u."
+      unit_of_measurement: "h"
+      accuracy_decimals: 0
+    power_supply_avail_hours:
+      name: "Piec ilo\u015b\u0107 godzin zasilania"
+      unit_of_measurement: "h"
+      accuracy_decimals: 0
+    pump_starts:
+      name: "Piec ilo\u015b\u0107 start\u00f3w pompy"
+      unit_of_measurement: "il"
+      accuracy_decimals: 0
+    number_of_3way_valve_cycles:
+      name: "Piec ilo\u015b\u0107 tr\u00f3jdro\u017cnych cykli zaworu"
+      unit_of_measurement: "il"
+      accuracy_decimals: 0
+    burner_start_dhw:
+      name: "Piec ilo\u015b\u0107 start\u00f3w c.w.u."
+      unit_of_measurement: "il"
+      accuracy_decimals: 0
+    total_burner_start:
+      name: "Piec ilo\u015b\u0107 start\u00f3w palnika"
+      unit_of_measurement: "il"
+      accuracy_decimals: 0
+    failed_burner_start:
+      name: "Piec ilo\u015b\u0107 nieudanych start\u00f3w palnika"
+      unit_of_measurement: "il"
+      accuracy_decimals: 0
+    number_flame_loss:
+      name: "Piec ilo\u015b\u0107 awarii p\u0142omienia"
+      unit_of_measurement: "il"
+      accuracy_decimals: 0
+    hydro_pressure:
+      name: "Piec Ci\u015bnienie wody"
+      unit_of_measurement: "bar"
+      accuracy_decimals: 2
+    control_temp:
+      name: "Piec kontrola temp."
+      unit_of_measurement: "°C"
+      accuracy_decimals: 2
+    dhw_flowrate:
+      name: "Piec nat\u0119\u017cenie przep\u0142ywu C.W.U."
+      unit_of_measurement: "l/m"
+      accuracy_decimals: 0
